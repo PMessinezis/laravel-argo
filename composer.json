@@ -51,7 +51,10 @@
         "laravel": {
             "providers": [
                 "Theomessin\\Argo\\ServiceProvider"
-            ]
+            ],
+            "aliases": {
+                "Argo": "Theomessin\\Argo\\ArgoFacade"
+            }
         }
     }
 }

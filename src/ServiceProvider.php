@@ -3,6 +3,7 @@
 namespace Theomessin\Argo;
 
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
+use Theomessin\Argo\Argo;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -25,5 +26,13 @@ class ServiceProvider extends BaseServiceProvider
     {
         // Automatically apply the package configuration
         $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'argo');
+
+        // Register the main class to use with the facade
+        $a = Argo::class;
+
+        $this->app->singleton($a, function () {
+            return new Argo();
+        });
+        $this->app->alias($a, 'argo');
     }
 }
