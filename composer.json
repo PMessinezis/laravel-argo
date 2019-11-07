@@ -1,0 +1,57 @@
+{
+    "name": "theomessin/laravel-argo",
+    "description": "A Laravel interface to calling argoproj/argo cli commands",
+    "keywords": [
+        "theomessin",
+        "laravel-argo"
+    ],
+    "homepage": "https://github.com/theomessin/laravel-argo",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Theodore Messinezis",
+            "email": "theodore@messinezis.com",
+            "role": "Developer"
+        },
+        {
+            "name": "Panagiotis Messinezis",
+            "email": "panagiotis@messinezis.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.2",
+        "illuminate/support": "^6.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^4.0",
+        "phpunit/phpunit": "^8.0",
+        "slevomat/coding-standard": "~5.0",
+        "squizlabs/php_codesniffer": "^3.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Theomessin\\Argo\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Theomessin\\Argo\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit --testdox",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Theomessin\\Argo\\ServiceProvider"
+            ]
+        }
+    }
+}
