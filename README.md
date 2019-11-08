@@ -10,11 +10,11 @@ Use Argo;
 $id = Argo::submit($file,$argoCommandLineParams = [], $bladeContext = null);
 
 ```
-$id will be used to all subsequent commands. 
+$id will be used as parameter to subsequent methods that manage and query the status and output of the submited workflow. 
 
-if file name extension is `.blade.yaml` then the file is first compiled to a ***tempFile*.yaml** under `storage_path('argo')` and then the compiled file is submitted to argo. Only in this case $bladeContext is used.
+$bladeContext is used when the file name extension is `.blade.yaml`. Files with extension `.blafe.yaml ` are first autocompiled to a ***tempFile*.yaml** under `storage_path('argo')` and then the compiled file is submitted to argo. 
 
-The optional arguments are expected to be associative arrays :
+The optional arguments are expected to be associative arrays, e.g. :
 
 ```
 $argoCommandLineParams = [ 
@@ -36,6 +36,8 @@ $bladeContext = [
 ```
 $status = Argo::status($id);
 ```
+Return value is one of `["Running", "Failed", "Succeeded"]` or null if something went wrong, e.g. file syntax validation failed
+
 ## wait
 ```
 Argo::wait($id, $timeout = 0);
