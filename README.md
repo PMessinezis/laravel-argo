@@ -148,9 +148,6 @@ kind: Workflow
 metadata:
   generateName: hello-world-parameters-
 spec:
-  # invoke the whalesay template with
-  # "hello world" as the argument
-  # to the message parameter
   entrypoint: whalesay
   arguments:
     parameters:
@@ -163,7 +160,6 @@ spec:
       parameters:
       - name: message       # parameter declaration
     container:
-      # run cowsay with that message input parameter as args
       image: docker/whalesay
       command: [cowsay]
       args: ["@{{inputs.parameters.message}}"]
