@@ -100,6 +100,12 @@ class Argo
         $output = $this->exec($cmd);
     }
 
+    public function list()
+    {
+        $cmd = 'argo list -o wide' ;
+        return $this->exec($cmd);
+    }
+
     public function output($id)
     {
         if ($id) {

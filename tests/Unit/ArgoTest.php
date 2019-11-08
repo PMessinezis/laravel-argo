@@ -96,13 +96,27 @@ class ArgoTest extends TestCase
             'message' => 'Kati trehei ne ton Costa',
         ];
         $resource_id = Argo::submit($file, [], $data);
-
         if ($resource_id) {
             //Act: get status until not running
             Argo::wait($resource_id, 40);
             $output = Argo::output($resource_id);
             //Assert: status is not null
             $this->assertStringContainsString('Kati trehei ne ton Costa', $output);
+        } else {
+            $this->fail('No resource ID returned from submit');
+        }
+    }
+
+    /** @test */
+    public function argo_list()
+    {
+        $file = $this->yamlFiles_path('example-hello-world.yaml');
+        $resource_id = Argo::submit($file);
+
+        if ($resource_id) {
+            $list = Argo::list();
+            //Assert: status is not null
+            $this->assertStringContainsString($resource_id, $list);
         } else {
             $this->fail('No resource ID returned from submit');
         }
