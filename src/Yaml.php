@@ -10,7 +10,6 @@ class Yaml
 
     protected $validExtensions = [
         'blade.yaml',
-        'yaml',
     ];
     protected $view;
     protected $viewInstance;

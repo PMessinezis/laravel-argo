@@ -13,11 +13,44 @@ jobs:
       matrix:
         php-versions: ['7.2', '7.3']
     name: phpunit (php-${{ matrix.php-versions }})
+    timeout-minutes: 15
     steps:
+
+    - name: Setup Minikube and Argo
+      run: |
+        cd
+        pwd
+        uname -a
+        lsb_release --all
+        docker --version
+        sudo apt-get update
+        sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add 
+        sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+        sudo apt-get update
+        sudo apt-get install docker-ce=18.06.2~ce~3-0~ubuntu
+        docker --version
+        sudo curl -L -o /usr/local/bin/minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+        sudo chmod +x /usr/local/bin/minikube
+        sudo minikube start --vm-driver none
+        sudo minikube update-context
+        sudo chown -R $USER $HOME/.kube $HOME/.minikube
+        curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
+        chmod +x kubectl
+        sudo mv kubectl /usr/local/bin/
+        kubectl version
+        kubectl cluster-info
+        kubectl get pods -n kube-system
+        sudo curl -sSL -o /usr/local/bin/argo https://github.com/argoproj/argo/releases/download/v2.3.0/argo-linux-amd64
+        sudo chmod +x /usr/local/bin/argo
+        kubectl create namespace argo
+        kubectl apply -n argo -f https://raw.githubusercontent.com/argoproj/argo/stable/manifests/install.yaml
+        kubectl create rolebinding default-admin --clusterrole=admin --serviceaccount=default:default
+        argo list
 
     - name: Checkout code
       uses: actions/checkout@master
-
+      
     - name: Set up environment
       uses: shivammathur/setup-php@master
       with:
