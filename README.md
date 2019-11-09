@@ -1,8 +1,10 @@
 # Usage :
 
+
 ```
 Use Argo;
 ```
+
 
 ## submit
 
@@ -31,24 +33,32 @@ $bladeContext = [
 
 ```
 
-## status
+
+## monitor
 
 ```
-$status = Argo::status($id);
+Argo::monitor($id)
 ```
-Return value is one of `["Running", "Failed", "Succeeded"]` or null if something went wrong, e.g. file syntax validation failed
 
-## wait
+
+queues an ArgoMonitor job which waits for the workflow to be completed. When the workflow is completed the job fires an ArgoFinished event. In order to catch the event, the listener needs to be registered in EventServiceProvider, e.g. :
+
+
 ```
-Argo::wait($id, $timeout = 0);
+    protected $listen = [
+        \Theomessin\Argo\Events\ArgoFinished::class => [
+            \App\Listeners\ArgoFinished::class
+        ],
+    ];
 ```
-returns once the workflow execution is completed or, if timeout >0, when timeout expires. 
+
 
 ## output
 
 ```
 $output = Argo::output($id);
 ```
+
 
 ## get
 
@@ -135,11 +145,30 @@ returns all details about the specific resource as an object, e.g.
 }
 
 ```
+
+
+## status
+
+```
+$status = Argo::status($id);
+```
+returns one of `["Running", "Failed", "Succeeded"]` or null if something went wrong, e.g. file syntax validation failed
+
+
+## wait
+```
+Argo::wait($id, $timeout = 0);
+```
+waits for and returns when the workflow execution is completed or, if timeout >0, when timeout expires. 
+
+
 ## list
 
 ```
 $text = Argo::list();
 ```
+
+
 ## blade.yaml
 A yaml file that contains blade directives. Double braces that are part of argo syntax must be escaped with @, i.e. `"@{{inputs.parameters.message}}"`. Example :
 ```
