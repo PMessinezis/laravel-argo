@@ -3,7 +3,9 @@
 namespace Theomessin\Argo\Tests;
 
 use Argo;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
+use Theomessin\Argo\Events\ArgoFinished;
 use Theomessin\Argo\Jobs\ArgoMonitor;
 use Theomessin\Argo\Tests\TestCase;
 
@@ -63,8 +65,9 @@ class ArgoTest extends TestCase
             //Act: get status until not running
             Argo::wait($resource_id, 40);
             $output = Argo::output($resource_id);
-            //Assert: status is not null
-            $this->assertStringContainsString('hello world', $output);
+
+            //Assert: output contains the string
+            $this->assertStringContainsString('hello world', $output ?? '');
         } else {
             $this->fail('No resource ID returned from submit');
         }
@@ -83,8 +86,9 @@ class ArgoTest extends TestCase
             //Act: get status until not running
             Argo::wait($resource_id, 40);
             $output = Argo::output($resource_id);
-            //Assert: status is not null
-            $this->assertStringContainsString('Kati trehei ne tin Mary', $output);
+
+            //Assert: output contains the string
+            $this->assertStringContainsString('Kati trehei ne tin Mary', $output ?? '');
         } else {
             $this->fail('No resource ID returned from submit');
         }
@@ -102,14 +106,16 @@ class ArgoTest extends TestCase
             //Act: get status until not running
             Argo::wait($resource_id, 40);
             $output = Argo::output($resource_id);
-            //Assert: status is not null
-            $this->assertStringContainsString('Kati trehei ne ton Costa', $output);
+
+            //Assert: output contains the string
+            $this->assertStringContainsString('Kati trehei ne ton Costa', $output ?? '');
         } else {
+
             $this->fail('No resource ID returned from submit');
         }
     }
 
-    /** @test */
+        /** @test */
     public function argo_list()
     {
         $file = $this->yamlFiles_path('example-hello-world.yaml');
@@ -142,12 +148,12 @@ class ArgoTest extends TestCase
         });
     }
 
-   /** @test */
+    //    /** @test */ commented out since approach of job changed to wait instead of resubmitting
     public function monitoring_job_is_re_submitted_if_workflow_is_running()
     {
         Queue::fake();
 
-        // //Arrange: submit a workflow
+        //Arrange: submit a workflow that takes a minute to complete
         $file = $this->yamlFiles_path('example-sleep.yaml');
         $seconds = 60;
         $resource_id = Argo::submit($file, compact('seconds'));
@@ -167,6 +173,27 @@ class ArgoTest extends TestCase
 
         //Assert: job pushed again on queue
         Queue::assertPushed(ArgoMonitor::class, 2);
+    }
+
+    /** @test */
+    public function event_is_fired_when_workflow_finishes()
+    {
+        Event::fake();
+
+        //Arrange: submit a workflow that takes 5 seconds to complete and wait to finish
+        $file = $this->yamlFiles_path('example-sleep.yaml');
+        $seconds = 5;
+        $resource_id = Argo::submit($file, compact('seconds'));
+        Argo::wait($resource_id);
+
+        //Act: execute the monitoring job
+        $job = new ArgoMonitor($resource_id);
+        $job->handle();
+
+        //Assert: Event was fired
+        Event::assertDispatched(ArgoFinished::class, function ($e) use ($resource_id) {
+            return $e->resource_id === $resource_id;
+        });
     }
 
     protected function tearDown(): void

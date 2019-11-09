@@ -14,9 +14,12 @@ class Argo
         return true;
     }
 
-    protected function exec($cmd)
+    protected function exec($cmd, $escapeCommand = true)
     {
-        return shell_exec(escapeshellcmd($cmd) . ' 2>&1');
+        if ($escapeCommand) {
+            $cmd = escapeshellcmd($cmd);
+        }
+        return shell_exec($cmd . ' 2>&1');
     }
 
     public function compile($file, $data)
@@ -54,7 +57,7 @@ class Argo
         if (!$id) {
             throw new Exception($output);
         }
-        // commented out during development for debuging blade.yaml if needed
+        // commented out during development jic for debuging blade.yaml
         // if ($tmpfile) {
         //     unlink($tmpfile) ;
         // }
@@ -112,8 +115,8 @@ class Argo
         if ($id) {
             $json = $this->get($id);
             if (is_object($json)) {
-                $cmd = 'argo logs ' . $id ;
-                $output = $this->exec($cmd);
+                $cmd = 'argo logs --no-color ' . $id . ' || argo logs --no-color -w ' . $id;
+                $output = $this->exec($cmd, false);
                 return $output;
             } else {
                 throw new Exception("Resource ID $id not found");

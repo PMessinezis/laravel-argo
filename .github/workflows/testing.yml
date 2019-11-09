@@ -36,7 +36,8 @@ jobs:
 
     - name: Setup kubectl
       run: |
-        curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
+        kubectl_version=`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`
+        curl -SLO https://storage.googleapis.com/kubernetes-release/release/$kubectl_version/bin/linux/amd64/kubectl
         chmod +x kubectl
         sudo mv kubectl /usr/local/bin/
         kubectl version
@@ -45,7 +46,8 @@ jobs:
 
     - name: Setup argo
       run: |
-        sudo curl -sSL -o /usr/local/bin/argo https://github.com/argoproj/argo/releases/download/v2.3.0/argo-linux-amd64
+        argo_version=`curl -s https://github.com/argoproj/argo/releases/latest| sed -E 's/.*tag\/(.*)\".*/\1/'`
+        sudo curl -SL -o /usr/local/bin/argo https://github.com/argoproj/argo/releases/download/$argo_version/argo-linux-amd64
         sudo chmod +x /usr/local/bin/argo
         kubectl create namespace argo
         kubectl apply -n argo -f https://raw.githubusercontent.com/argoproj/argo/stable/manifests/install.yaml

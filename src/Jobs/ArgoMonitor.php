@@ -8,6 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Theomessin\Argo\Events\ArgoFinished;
 
 class ArgoMonitor implements ShouldQueue
 {
@@ -25,13 +26,19 @@ class ArgoMonitor implements ShouldQueue
 
     public function handle()
     {
-        $status = Argo::status($this->resource_id);
-        switch ($status) {
-            case 'Running':
-                self::dispatch($this->resource_id)->delay(now()->addMinute(1));
-                break;
-            default:
-                // fire an event probably
-        }
+        // This approach might block the queue - should be tested during integration stress test
+        Argo::wait($this->resource_id);
+        event(new ArgoFinished($this->resource_id));
+
+        // This approach checks if finished and if not resubmits the job after 10''
+        // ( the period is arbitrary - it could be given/overriden as constructor argument instead)
+        // $status = Argo::status($this->resource_id);
+        // switch ($status) {
+        //     case 'Running':
+        //         self::dispatch($this->resource_id)->delay(now()->addSeconds(10));
+        //         break;
+        //     default:
+        //         event(new ArgoFinished($this->resource_id));
+        // }
     }
 }
