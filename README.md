@@ -172,7 +172,8 @@ $text = Argo::list();
 
 
 ## blade.yaml
-A yaml file that contains blade directives. Double braces that are part of argo syntax must be escaped with @, i.e. `"@{{inputs.parameters.message}}"`. Example :
+A yaml file that contains blade directives. Double braces that are part of argo syntax must be escaped with @, i.e. `"@{{inputs.parameters.message}}"`. Examples :
+
 ```
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
@@ -193,5 +194,49 @@ spec:
     container:
       image: docker/whalesay
       command: [cowsay]
+      args: ["@{{inputs.parameters.message}}"]
+```
+
+
+and 
+
+
+```
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: loops-
+spec:
+  entrypoint: loop-example
+  templates:
+  - name: loop-example
+    steps:
+    - - name: print-message
+        template: whalesay
+        arguments:
+          parameters:
+          - name: message
+            value: "@{{item}}"
+        withItems:              # invoke whalesay once for each item in parallel
+        @foreach($things_to_say as $thing)
+        - {{$thing}}           # item 1
+        @endforeach
+
+    - - name: sleep
+        template: sleep
+
+  - name: sleep
+    container:
+      image: alpine:latest
+      command: [sh, -c]
+      args: ["echo sleeping for 10 seconds; sleep 10; echo done"]
+
+  - name: whalesay
+    inputs:
+      parameters:
+      - name: message
+    container:
+      image: docker/whalesay:latest
+      command: [echo]
       args: ["@{{inputs.parameters.message}}"]
 ```
