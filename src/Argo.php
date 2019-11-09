@@ -4,6 +4,7 @@ namespace Theomessin\Argo;
 
 use Exception;
 use Illuminate\Support\Str;
+use Theomessin\Argo\Jobs\ArgoMonitor;
 use Theomessin\Argo\Yaml;
 
 class Argo
@@ -135,5 +136,10 @@ class Argo
                 }
             }
         }
+    }
+
+    public function monitor($id)
+    {
+        ArgoMonitor::dispatch($id);
     }
 }

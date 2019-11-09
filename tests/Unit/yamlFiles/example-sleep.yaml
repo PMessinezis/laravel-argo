@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: sleep-
+spec:
+  entrypoint: sleep
+  arguments:
+    parameters:
+    - name: seconds
+      value: 0
+  templates:
+  - name: sleep
+    inputs:
+      parameters:
+      - name: seconds
+    container:
+      image: alpine:latest
+      command: [sh, -c]
+      args: ["echo sleeping for {{inputs.parameters.seconds}} seconds; sleep {{inputs.parameters.seconds}}; echo done"]

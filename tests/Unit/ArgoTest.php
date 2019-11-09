@@ -3,6 +3,8 @@
 namespace Theomessin\Argo\Tests;
 
 use Argo;
+use Illuminate\Support\Facades\Queue;
+use Theomessin\Argo\Jobs\ArgoMonitor;
 use Theomessin\Argo\Tests\TestCase;
 
 class ArgoTest extends TestCase
@@ -41,7 +43,7 @@ class ArgoTest extends TestCase
         $resource_id = Argo::submit($file);
 
         if ($resource_id) {
-           //Act: get status
+            //Act: get status
             $status = Argo::status($resource_id);
 
             //Assert: status is not null
@@ -120,6 +122,51 @@ class ArgoTest extends TestCase
         } else {
             $this->fail('No resource ID returned from submit');
         }
+    }
+
+    /** @test */
+    public function monitoring_job_is_queued()
+    {
+        Queue::fake();
+
+        // //Arrange: submit a workflow
+        $file = $this->yamlFiles_path('example-hello-world.yaml');
+        $resource_id = Argo::submit($file);
+
+        //Act: start monitoring
+        Argo::monitor($resource_id);
+
+        //Assert:
+        Queue::assertPushed(ArgoMonitor::class, function ($job) use ($resource_id) {
+            return $job->resource_id === $resource_id;
+        });
+    }
+
+   /** @test */
+    public function monitoring_job_is_re_submitted_if_workflow_is_running()
+    {
+        Queue::fake();
+
+        // //Arrange: submit a workflow
+        $file = $this->yamlFiles_path('example-sleep.yaml');
+        $seconds = 60;
+        $resource_id = Argo::submit($file, compact('seconds'));
+
+        //Act: start monitoring
+        Argo::monitor($resource_id);
+
+        //Assert: job pushed on queue once for this resource_id
+        Queue::assertPushed(ArgoMonitor::class, 1);
+        Queue::assertPushed(ArgoMonitor::class, function ($job) use ($resource_id) {
+            return $job->resource_id === $resource_id;
+        });
+
+        //Act: handle job - it should resubmit itself since workflow is still running
+        $job = new ArgoMonitor($resource_id);
+        $job->handle();
+
+        //Assert: job pushed again on queue
+        Queue::assertPushed(ArgoMonitor::class, 2);
     }
 
     protected function tearDown(): void
