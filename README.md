@@ -9,12 +9,11 @@ Use Argo;
 ## submit
 
 ```
-$id = Argo::submit($file,$argoCommandLineParams = [], $bladeContext = null);
-
+$workflow_id = Argo::submit($yamlfile, $argoCommandLineParams = [], $bladeContext = null);
 ```
-$id will be used as parameter to subsequent methods that manage and query the status and output of the submited workflow. 
+$workflow_id will be used as parameter to subsequent methods that manage and query the status and output of the submited workflow. 
 
-$bladeContext is used when the file name extension is `.blade.yaml`. Files with extension `.blafe.yaml ` are first autocompiled to a ***tempFile*.yaml** under `storage_path('argo')` and then the compiled file is submitted to argo. 
+$yamlfile should include the full path of the file.
 
 The optional arguments are expected to be associative arrays, e.g. :
 
@@ -30,14 +29,17 @@ $bladeContext = [
     'variable1' => $variable1,
     ...
 ];
-
 ```
+
+$argoCommandLineParams are appended to the call to `argo submit ..` as ` ... -p paramName1=paramValue1`
+
+$bladeContext is used when the file name extension is `.blade.yaml`. Files with extension `.blafe.yaml ` are first autocompiled to a ***tempFile*.yaml** under `storage_path('argo')` and then the compiled file is submitted to argo. 
 
 
 ## monitor
 
 ```
-Argo::monitor($id)
+Argo::monitor($workflow_id)
 ```
 
 
@@ -56,14 +58,14 @@ queues an ArgoMonitor job which waits for the workflow to be completed. When the
 ## output
 
 ```
-$output = Argo::output($id);
+$output = Argo::output($workflow_id);
 ```
 
 
 ## get
 
 ```
-$obj = Argo::get($id);
+$obj = Argo::get($workflow_id);
 ```
 returns all details about the specific resource as an object, e.g. 
 ```
@@ -150,14 +152,14 @@ returns all details about the specific resource as an object, e.g.
 ## status
 
 ```
-$status = Argo::status($id);
+$status = Argo::status($workflow_id);
 ```
 returns one of `["Running", "Failed", "Succeeded"]` or null if something went wrong, e.g. file syntax validation failed
 
 
 ## wait
 ```
-Argo::wait($id, $timeout = 0);
+Argo::wait($workflow_id, $timeout = 0);
 ```
 waits for and returns when the workflow execution is completed or, if timeout >0, when timeout expires. 
 
