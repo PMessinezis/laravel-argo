@@ -5,13 +5,32 @@
 Use Argo;
 ```
 
+[Argo::submit](#submit)
 
-## submit
+[Argo::monitor](#monitor)
+
+[Argo::output](#output)
+
+[Argo::get](#get)
+
+[Argo::status](#status)
+
+[Argo::wait](#wait)
+
+[Argo::list](#list)
+
+[Config](#config)
+
+[Blade YAML](#bladeyaml)
+
+------
+
+## submit 
 
 ```
 $workflow_id = Argo::submit($yamlfile, $argoCommandLineParams = [], $bladeContext = null);
 ```
-$workflow_id will be used as parameter to subsequent methods that manage and query the status and output of the submited workflow. 
+$workflow_id will be used as parameter to subsequent methods that manage and query the status and output of the submitted workflow. 
 
 $yamlfile should include the full path of the file.
 
@@ -33,8 +52,9 @@ $bladeContext = [
 
 $argoCommandLineParams are appended to the call to `argo submit ..` as ` ... -p paramName1=paramValue1`
 
-$bladeContext is used when the file name extension is `.blade.yaml`. Files with extension `.blafe.yaml ` are first autocompiled to a ***tempFile*.yaml** under `storage_path('argo')` and then the compiled file is submitted to argo. 
+$bladeContext is used when the file name extension is `.blade.yaml`. Submitted files with extension `.blade.yaml` are auto compiled to a temporary file with extension `.yaml` under `storage_path('argo')` and the compiled file is sent to argo. 
 
+<p align=right style="text-align: right"><a href='#usage-'> to top </a></p>
 
 ## monitor
 
@@ -55,6 +75,8 @@ queues an ArgoMonitor job which waits for the workflow to be completed. When the
 ```
 
 
+<p align=right style="text-align: right"><a href='#usage-'> to top </a></p>
+
 ## output
 
 ```
@@ -62,7 +84,10 @@ $output = Argo::output($workflow_id);
 ```
 
 
+<p align=right style="text-align: right"><a href='#usage-'> to top </a></p>
+
 ## get
+
 
 ```
 $obj = Argo::get($workflow_id);
@@ -147,7 +172,7 @@ returns all details about the specific resource as an object, e.g.
 }
 
 ```
-
+<p align=right style="text-align: right"><a href='#usage-'> to top </a></p>
 
 ## status
 
@@ -156,6 +181,7 @@ $status = Argo::status($workflow_id);
 ```
 returns one of `["Running", "Failed", "Succeeded"]` or null if something went wrong, e.g. file syntax validation failed
 
+<p align=right style="text-align: right"><a href='#usage-'> to top </a></p>
 
 ## wait
 ```
@@ -163,6 +189,7 @@ Argo::wait($workflow_id, $timeout = 0);
 ```
 waits for and returns when the workflow execution is completed or, if timeout >0, when timeout expires. 
 
+<p align=right style="text-align: right"><a href='#usage-'> to top </a></p>
 
 ## list
 
@@ -170,6 +197,20 @@ waits for and returns when the workflow execution is completed or, if timeout >0
 $text = Argo::list();
 ```
 
+<p align=right style="text-align: right"><a href='#usage-'> to top </a></p>
+
+## config
+
+The package publishes a [config file](../master/config/config.php) at config/argo.php where any argo global flag can by set. Defined global flags are appended to argo calls. Flags can also be set programmatically, e.g. :
+
+```
+
+$cluster = config('argo.global-flags.cluster');
+
+config( [ 'argo.global-flags.username' => 'thisUser' ] );
+
+```
+<p align=right style="text-align: right"><a href='#usage-'> to top </a></p>
 
 ## blade.yaml
 A yaml file that contains blade directives. Double braces that are part of argo syntax must be escaped with @, i.e. `"@{{inputs.parameters.message}}"`. Examples :
@@ -240,3 +281,6 @@ spec:
       command: [echo]
       args: ["@{{inputs.parameters.message}}"]
 ```
+
+<p align=right style="text-align: right"><a href='#usage-'> to top </a></p>
+

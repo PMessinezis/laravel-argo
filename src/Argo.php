@@ -14,12 +14,29 @@ class Argo
         return true;
     }
 
-    protected function exec($cmd, $escapeCommand = true)
+    protected function exec($cmd, $escapeCommand = true, $withFlags = true)
     {
         if ($escapeCommand) {
             $cmd = escapeshellcmd($cmd);
         }
-        return shell_exec($cmd . ' 2>&1');
+        return shell_exec($cmd . ( $withFlags ? $this->flags() : '') . ' 2>&1');
+    }
+
+    public function flags()
+    {
+        $flags = '';
+        foreach (config('argo.global-flags') as $flag => $value) {
+            if ($value !== null) {
+                if (is_array($value)) {
+                    foreach ($value as $v) {
+                        $flags .= " --$flag='$v'";
+                    }
+                } else {
+                    $flags .= " --$flag='$value'";
+                }
+            }
+        }
+        return $flags;
     }
 
     public function compile($file, $data)
@@ -57,10 +74,10 @@ class Argo
         if (!$id) {
             throw new Exception($output);
         }
-        // commented out during development jic for debuging blade.yaml
-        // if ($tmpfile) {
-        //     unlink($tmpfile) ;
-        // }
+        // comment out during development for debuging output of compile
+        if ($tmpfile) {
+            unlink($tmpfile) ;
+        }
         return $id;
     }
 
@@ -115,8 +132,9 @@ class Argo
         if ($id) {
             $json = $this->get($id);
             if (is_object($json)) {
-                $cmd = 'argo logs --no-color ' . $id . ' || argo logs --no-color -w ' . $id;
-                $output = $this->exec($cmd, false);
+                $cmd = 'argo logs ' . $id . ' --no-color ' . $this->flags() ;
+                $cmd .= ' || ' . $cmd . ' -w ';
+                $output = $this->exec($cmd, false, false);
                 return $output;
             } else {
                 throw new Exception("Resource ID $id not found");
