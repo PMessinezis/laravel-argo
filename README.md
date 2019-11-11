@@ -9,7 +9,7 @@ Use Argo;
 
 [Argo::monitor](#monitor)
 
-[Argo::output](#output)
+[Argo::logs](#logs)
 
 [Argo::get](#get)
 
@@ -30,7 +30,7 @@ Use Argo;
 ```
 $workflow_id = Argo::submit($yamlfile, $argoCommandLineParams = [], $bladeContext = null);
 ```
-$workflow_id will be used as parameter to subsequent methods that manage and query the status and output of the submitted workflow. 
+$workflow_id will be used as parameter to subsequent methods that manage and query the status and outcome of the submitted workflow. 
 
 $yamlfile should include the full path of the file.
 
@@ -77,10 +77,10 @@ queues an ArgoMonitor job which waits for the workflow to be completed. When the
 
 <p align=right style="text-align: right"><a href='#usage-'> to top </a></p>
 
-## output
+## logs
 
 ```
-$output = Argo::output($workflow_id);
+$logs = Argo::logs($workflow_id);
 ```
 
 

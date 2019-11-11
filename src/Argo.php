@@ -60,9 +60,9 @@ class Argo
             }
         }
         $cmd = 'argo submit ' . $file . $params . ' -o json';
-        $output = $this->exec($cmd);
+        $result = $this->exec($cmd);
         try {
-            $json = json_decode($output);
+            $json = json_decode($result);
             if (is_object($json)) {
                 $id = $json->metadata->name;
             } else {
@@ -72,7 +72,7 @@ class Argo
             $id = null;
         }
         if (!$id) {
-            throw new Exception($output);
+            throw new Exception($result);
         }
         // comment out during development for debuging output of compile
         if ($tmpfile) {
@@ -84,8 +84,8 @@ class Argo
     public function get($id)
     {
         $cmd = 'argo get ' . $id . ' -o json';
-        $output = $this->exec($cmd);
-        $json = json_decode($output);
+        $result = $this->exec($cmd);
+        $json = json_decode($result);
         return $json;
     }
 
@@ -94,7 +94,13 @@ class Argo
         if ($id) {
             $json = $this->get($id);
             if (is_object($json)) {
-                $status = $json->status->phase;
+                if (isset($json->status->phase)) {
+                    $status = $json->status->phase;
+                } else {
+                    dump($json);
+                    dump($this->list);
+                    throw new Exception("Unexpected result from argo get $id");
+                }
             } else {
                 throw new Exception("Resource ID $id not found");
             }
@@ -112,13 +118,13 @@ class Argo
     public function delete($id)
     {
         $cmd = 'argo delete ' . $id;
-        $output = $this->exec($cmd);
+        $this->exec($cmd);
     }
 
     public function deleteAll()
     {
         $cmd = 'argo delete --all' ;
-        $output = $this->exec($cmd);
+        $this->exec($cmd);
     }
 
     public function list()
@@ -127,15 +133,15 @@ class Argo
         return $this->exec($cmd);
     }
 
-    public function output($id)
+    public function logs($id)
     {
         if ($id) {
             $json = $this->get($id);
             if (is_object($json)) {
                 $cmd = 'argo logs ' . $id . ' --no-color ' . $this->flags() ;
                 $cmd .= ' || ' . $cmd . ' -w ';
-                $output = $this->exec($cmd, false, false);
-                return $output;
+                $logs = $this->exec($cmd, false, false);
+                return $logs;
             } else {
                 throw new Exception("Resource ID $id not found");
             }

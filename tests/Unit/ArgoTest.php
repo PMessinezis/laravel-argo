@@ -56,7 +56,7 @@ class ArgoTest extends TestCase
     }
 
     /** @test */
-    public function return_execution_output()
+    public function return_execution_logs()
     {
         $file = $this->yamlFiles_path('example-hello-world.yaml');
         $resource_id = Argo::submit($file);
@@ -64,10 +64,10 @@ class ArgoTest extends TestCase
         if ($resource_id) {
             //Act: get status until not running
             Argo::wait($resource_id, 40);
-            $output = Argo::output($resource_id);
+            $logs = Argo::logs($resource_id);
 
-            //Assert: output contains the string
-            $this->assertStringContainsString('hello world', $output ?? '');
+            //Assert: logs contain the string
+            $this->assertStringContainsString('hello world', $logs ?? '');
         } else {
             $this->fail('No resource ID returned from submit');
         }
@@ -85,10 +85,10 @@ class ArgoTest extends TestCase
         if ($resource_id) {
             //Act: get status until not running
             Argo::wait($resource_id, 40);
-            $output = Argo::output($resource_id);
+            $logs = Argo::logs($resource_id);
 
-            //Assert: output contains the string
-            $this->assertStringContainsString('Kati trehei ne tin Mary', $output ?? '');
+            //Assert: logs contain the string
+            $this->assertStringContainsString('Kati trehei ne tin Mary', $logs ?? '');
         } else {
             $this->fail('No resource ID returned from submit');
         }
@@ -105,10 +105,10 @@ class ArgoTest extends TestCase
         if ($resource_id) {
             //Act: get status until not running
             Argo::wait($resource_id, 40);
-            $output = Argo::output($resource_id);
+            $logs = Argo::logs($resource_id);
 
-            //Assert: output contains the string
-            $this->assertStringContainsString('Kati trehei ne ton Costa', $output ?? '');
+            //Assert: logs contain the string
+            $this->assertStringContainsString('Kati trehei ne ton Costa', $logs ?? '');
         } else {
 
             $this->fail('No resource ID returned from submit');
